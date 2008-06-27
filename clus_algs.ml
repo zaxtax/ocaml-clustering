@@ -120,18 +120,29 @@ let dist_dt date1 date2 =
   let dt2epoch d = (((mon2day.(d.dt_mon) + d.dt_dat)*24+d.dt_hour)*60+d.dt_min)*60+d.dt_sec in
   abs $ dt2epoch date1 - dt2epoch date2;;
 
-let dist_log = memoize2 (fun log1 log2 ->
-   
-   sum [ dist_dt log1.timestamp log2.timestamp;
-	 fromEnum (log1.host<>log2.host);
-	 fromEnum (log1.app<>log2.app);
-(* 	 fromEnum (log1.msg<>log2.msg)]) 1500000;;  *)
-	 levenshtein log1.msg log2.msg ]) 1500000;;
+let normalize_coeffs data = (* normalization coefficents for kernel function *)
+  let len = Array.length data in
+  let log_max = 
+    Array.fold_left 
+      (fun x y -> 
+	let len = String.length y.msg in if x>len then x else len) 
+      0 data in
+  let dt_max = dist_dt data.(0).timestamp data.(len-1).timestamp in
+  List.map float_of_int [dt_max; 1; 1; log_max];;
 
-let k_means bin k =
+let dist_log_gen cof  = memoize2 (fun log1 log2 ->
+   List.fold_left2 (fun acc d c -> acc +. (float_of_int d /. c) ) 0.0 
+     [ dist_dt log1.timestamp log2.timestamp;
+       fromEnum (log1.host<>log2.host);
+       fromEnum (log1.app<>log2.app);
+(*     fromEnum (log1.msg<>log2.msg)]) 1500000;;  *)
+       levenshtein log1.msg log2.msg ] cof) 1500000;;
+
+let k_means data k =
   (* Initial Centers *)
-  let data = Array.of_enum bin in
   let cen = choice data k in
+  let cof = normalize_coeffs data in
+  let dist_log = dist_log_gen cof in
   for trials = 0 to 10 do
 
     (* Assign to Clusters *)
@@ -147,7 +158,7 @@ let k_means bin k =
     (* Find new centers *)
     Array.iter (fun center -> 
       let candidate_centers = List.map (fun elm -> 
-	let m = List.fold_left (fun x y -> x + dist_log elm y) 0 center.cl_elm in elm,m
+	let m = List.fold_left (fun x y -> x +. dist_log elm y) 0.0 center.cl_elm in elm,m
       ) center.cl_elm in
       let new_cen,_ = foldl1 
 	(fun x y -> match x,y with 
@@ -158,20 +169,21 @@ let k_means bin k =
 
 
 let single_pass data thresh =
-  let group pt clus =
+  let cof = normalize_coeffs data in
+  let dist_log = dist_log_gen cof in
+  let group clus pt =
     let m = ref 0 in
     for i = 0 to (List.length clus)-1 do
       if dist_log pt (List.nth clus i).cl_cen <
 	 dist_log pt (List.nth clus !m).cl_cen
       then m:=i
     done;
-    if dist_log pt (List.nth clus !m).cl_cen < thresh then
+    if !m=0 then {cl_cen=pt;cl_elm=[]} :: clus
+    else if dist_log pt (List.nth clus !m).cl_cen < thresh then
       let m_cen = List.nth clus !m in
       m_cen.cl_elm <- pt :: m_cen.cl_elm; clus
-    else {cl_cen=pt;cl_elm=[]} :: clus in  
-  match Enum.get data with
-    | Some hd -> Enum.fold group [{cl_cen=hd;cl_elm=[]}] data
-    | None -> raise EmptyList;;  
+    else {cl_cen=pt;cl_elm=[]} :: clus in 
+  Array.fold_left group [] data;;
 
 let print_time t = String.concat ":" 
   (List.map 
@@ -195,11 +207,13 @@ let time_it f =
     
 let _ = 
   if (Array.length Sys.argv) = 3 then
-    let data,len = load_file Sys.argv.(1) in
+    let buf,len = load_file Sys.argv.(1) in
+    let data = Array.of_enum buf in
     let k = int_of_string Sys.argv.(2) in
     Sys.catch_break true;
     let res,time = time_it (fun _ -> k_means data k) in
-    print_float time; 
+    print_float $ time; 
+    print_string $ " clusters: " ^ string_of_int (Array.length res); 
     print_string $ Array.fold_left 
       (fun x y -> x ^ "\n" ^ print_cluster y) "\n" res
-  else prerr_string $ "usage: " ^ Sys.argv.(0) ^ " log k\n";; 
+  else prerr_string $ "usage: " ^ Sys.argv.(0) ^ " file param\n";; 
