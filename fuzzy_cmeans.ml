@@ -1,7 +1,5 @@
 open Common;;
 
-let folder = Array.fold_left;;
-
 let fuzzy_cmeans data len c =
   let cen = choice data c in
   let ind = Array.init len id in (* indices of data *)

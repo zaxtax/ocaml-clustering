@@ -1,8 +1,6 @@
 open Common;;
 
-let folder = Array.fold_left;;
-
-let k_means data _ k =
+let k_means data len k =
   (* Initial Centers *)
   let cen = choice data k in
   let cof = normalize_coeffs data in
