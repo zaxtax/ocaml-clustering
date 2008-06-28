@@ -6,7 +6,7 @@ let k_means data len k =
   let cof = normalize_coeffs data in
   let dist_log = dist_log_gen cof in
   for trials = 0 to 10 do
-
+ 
     (* Assign to Clusters *)
     Array.iter (fun elm ->
       let m = ref 0 in

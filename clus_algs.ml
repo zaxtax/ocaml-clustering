@@ -1,7 +1,7 @@
 open ExtArray;;
 open Common;;
 
-let usage = "usage: " ^ Sys.argv.(0) ^ " file param\n";; 
+let usage = "usage: " ^ Sys.argv.(0) ^ " alg file param\n";; 
 type 'a lo = K 
 
 let _ = 
@@ -12,7 +12,7 @@ let _ =
     let data = Array.of_enum buf in
     let loader = match Sys.argv.(1) with
       | "fuzzy_cmeans" -> Fuzzy_cmeans.loader
-      | "k_means" -> K_means.loader
+      | "k_means" -> K_means.loader 
       | "single_pass" -> Single_pass.loader   
       | _ -> failwith usage in
     let clus,clus_len,time = loader data len param in

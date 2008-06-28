@@ -10,8 +10,18 @@ let fuzzy_cmeans data len c =
   let diff a b i =
     (1.0-.u.(a).(i))*.
     (1.0-.u.(b).(i))*.
-    (dist_log data.(a) data.(b)) in
+    (dist_log data.(a) data.(b))/.
+    (dist_log data.(a) data.(i))  in
   for trials = 0 to 10 do
+    (* Assign to Clusters *)
+    Array.iter (fun elm ->
+      let m = ref 0.0 in
+      for i = 0 to c-1 do
+	m:=!m+.dist_log data.(elm) cen.(i).cl_cen
+      done;
+      for i = 0 to c-1 do
+	u.(elm).(i) <- (dist_log data.(elm) cen.(i).cl_cen) /. !m
+      done) ind;
     (* Find new Centers *)
     Array.iteri (fun ci center ->
       let candidate_centers = Array.mapi (fun ei elm -> 
@@ -23,15 +33,6 @@ let fuzzy_cmeans data len c =
 	candidate_centers.(0) 
 	candidate_centers in
       center.cl_cen <- new_cen) cen;
-    (* Assign to Clusters *)
-    Array.iter (fun elm ->
-      let m = ref 0.0 in
-      for i = 0 to c-1 do
-	m:=!m+.dist_log data.(elm) cen.(i).cl_cen
-      done;
-      for i = 0 to c-1 do
-	u.(elm).(i) <- (dist_log data.(elm) cen.(i).cl_cen) /. !m
-      done) ind;
   done; cen;;
 
 let loader data len param =
