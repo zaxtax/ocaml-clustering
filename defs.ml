@@ -3,6 +3,7 @@
 
 #load "str.cma";;
 #load "unix.cma";;
+#use  "clus_algs.ml";;
 
 type date = {dt_mon : int; dt_dat : int; dt_hour : int; dt_min : int; dt_sec : int};; 
 type syslog = {timestamp : Date, host : string, app : string, msg : string} ;; 
