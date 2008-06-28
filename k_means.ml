@@ -1,6 +1,8 @@
 open Common;;
 
-let k_means data k =
+let folder = Array.fold_left;;
+
+let k_means data _ k =
   (* Initial Centers *)
   let cen = choice data k in
   let cof = normalize_coeffs data in
@@ -28,3 +30,8 @@ let k_means data k =
 	center.cl_cen <- new_cen; 
 	center.cl_elm <- []) cen;
   done; cen;;
+
+let loader data len param =
+  let k = int_of_string param in
+  let res, time = time_it (fun _ -> k_means data len k) in
+  res,k,time;;

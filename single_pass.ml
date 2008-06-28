@@ -1,6 +1,8 @@
 open Common;;
 
-let single_pass data thresh =
+let folder = List.fold_left;;
+
+let single_pass data _ thresh =
   let cof = normalize_coeffs data in
   let dist_log = dist_log_gen cof in
   let group clus pt =
@@ -16,3 +18,8 @@ let single_pass data thresh =
       m_cen.cl_elm <- pt :: m_cen.cl_elm; clus
     else {cl_cen=pt;cl_elm=[]} :: clus in 
   Array.fold_left group [] data;;
+
+let loader data len param =
+  let thresh = float_of_string param in
+  let res, time = time_it (fun _ -> single_pass data len thresh) in
+  res,(List.length res),time;;
