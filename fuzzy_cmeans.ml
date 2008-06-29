@@ -4,23 +4,29 @@ let fuzzy_cmeans data len c =
   let cen = choice data c in
   let ind = Array.init len id in (* indices of data *)
   let cof = normalize_coeffs data in
-  let dist_log = dist_log_gen cof in (* this might as well be a matrix now *)
+  let dist_log = dist_log_gen cof in 
+  (* this might as well be a matrix now *)
+  let gram = Array.init len 
+    (fun i -> Array.init len 
+      (fun j -> dist_log data.(i) data.(j))) in
+    
   (* Initial Centers *)
   let u = Array.make_matrix len c (1.0 /. (float_of_int c)) in
   let diff a b i =
-    (1.0-.u.(a).(i))*.
-    (1.0-.u.(b).(i))*.
-    (dist_log data.(a) data.(b))/.
-    (dist_log data.(a) data.(i))  in
+    u.(a).(i) *.
+    u.(b).(i) *.
+    ( gram.(a).(b) ) /.
+    ( gram.(a).(i) ) /.
+    ( gram.(a).(i) ) in
   for trials = 0 to 10 do
     (* Assign to Clusters *)
     Array.iter (fun elm ->
       let m = ref 0.0 in
       for i = 0 to c-1 do
-	m:=!m+.dist_log data.(elm) cen.(i).cl_cen
+	m:=!m+. gram.(elm).(i)
       done;
       for i = 0 to c-1 do
-	u.(elm).(i) <- (dist_log data.(elm) cen.(i).cl_cen) /. !m
+	u.(elm).(i) <- ( gram.(elm).(i) ) /. !m
       done) ind;
     (* Find new Centers *)
     Array.iteri (fun ci center ->

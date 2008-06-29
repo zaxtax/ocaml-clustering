@@ -30,7 +30,7 @@ let argmin f = arg_func (<) f;;
 
 let minimum = foldl1 min;;
 let stol = ExtString.String.explode;; (* convert strings to list of chars *)
-
+ 
 let rec range a b = match a,b with
   | x,y when x<=y -> x :: range (x+1) y
   | _ -> [];;
@@ -135,8 +135,8 @@ let dist_log_gen cof  = memoize2 (fun log1 log2 ->
      [ dist_dt log1.timestamp log2.timestamp;
        fromEnum (log1.host<>log2.host);
        fromEnum (log1.app<>log2.app);
-(*     fromEnum (log1.msg<>log2.msg)]) 1500000;;  *)
-       levenshtein log1.msg log2.msg ] cof) 1500000;;
+(*     fromEnum (log1.msg<>log2.msg)] cof) 1500000;; *)
+       levenshtein log1.msg log2.msg ] cof)  1500000;;
 
 let print_time t = String.concat ":" 
   (List.map 
