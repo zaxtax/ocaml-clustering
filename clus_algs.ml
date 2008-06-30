@@ -13,7 +13,9 @@ let _ =
     let loader = match Sys.argv.(1) with
       | "fuzzy_cmeans" -> Fuzzy_cmeans.loader
       | "k_means" -> K_means.loader 
-      | "single_pass" -> Single_pass.loader   
+      | "single_pass" -> Single_pass.loader
+      | "agglo" -> Agglo.loader
+      | "buck" -> Buckshot.loader
       | _ -> failwith usage in
     let clus,clus_len,time = loader data len param in
     print_float $ time; 
