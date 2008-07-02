@@ -18,7 +18,7 @@ let fuzzy_cmeans data len c =
     ( gram.(a).(b) ) /.
     ( gram.(a).(i) ) /.
     ( gram.(a).(i) ) in
-  for trials = 0 to 10 do
+  for trials = 0 to 100 do
     (* Assign to Clusters *)
     Array.iter (fun elm ->
       let m = ref 0.0 in

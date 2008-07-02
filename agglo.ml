@@ -20,8 +20,6 @@ let agglomerative data len k =
 	acc +. bcc +. dist_log x y) 0.0 b.belm) 0.0 a.belm in
     res /. (float_of_int (a.blen*b.blen)) in
   let merge a b =
-(*     prerr_string $ "merging: " ^ (string_of_int a.blen) ^ " " ^ (string_of_int b.blen); *)
-(*     prerr_string "\n"; flush_all ();    *)
     let c = {blen=a.blen + b.blen; belm=Array.append a.belm b.belm} in
     Hashtbl.remove buckets a; 
     Hashtbl.remove buckets b;
@@ -34,7 +32,7 @@ let agglomerative data len k =
     let x,y = (ref _dummy, ref _dummy) in
     Hashtbl.iter (fun a _ -> 
     Hashtbl.iter (fun b _ ->
-    if a<>b then
+    if a!=b then
       let i = diff a b in
       if i < !m 
       then m:=i;x:=a; y:=b;
