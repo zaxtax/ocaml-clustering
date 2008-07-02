@@ -5,9 +5,11 @@ module M = Make (struct let get_visible _ = (0,0) end)
 open M;;
 
 let score_node st node = 
-  let w = label st n in
-  let docs = ext st n in
+  let w = label st node in
+  let docs = ext st node in
   let d = List.length docs in
+  (* Should have a merge base clusters here *)
+  (* let merge nodes = nodes in *)
   let f str = 
     let sl = String.length str in
     if sl < 2 then 1
@@ -16,15 +18,24 @@ let score_node st node =
   let score = d*(f w) in (score,docs,d)
 
 let suffix_clus data len c = 
-  let nodes = Hashtbl.create 500 in
+  let nodes = Array.init 40000 (fun _ -> (0,[],0) ) in
+  let ind = ref 0 in
   let st = create () in
-  Array.iter (fun x -> add st (print_cluster x)) data;
+  Array.iter (fun x -> ignore (add st (print_syslog x))) data;
   fold_tree st (fun _ _ -> true) (fun _ _ -> 0)
-    (fun _ _ n -> Hashtbl.add nodes $ score_node st n) 0;
-  
+    (fun _ _ n -> 
+      nodes.(!ind) <- (score_node st n); ind:=!ind+1) 0;
+  Array.sort (fun x y -> match x,y with
+    | (sx,_,_),(sy,_,_) -> 
+	if sx = sy then 0 
+	else if sx > sy then (-1) else 1) nodes;
+  Array.init c (fun i -> 
+    let entry = nodes.(i) in
+    let str = match entry with 
+      | score,docs,d -> get st (List.hd docs) in
+    {cl_cen=make_log str;cl_elm=[]})
 
-
-let loader data len c =
+let loader data len param =
   let c = int_of_string param in
   let res, time = time_it (fun _ -> suffix_clus data len c) in
   res,c,time;;
