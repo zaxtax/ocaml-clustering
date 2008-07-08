@@ -6,7 +6,7 @@ open M;;
 
 let score_node st node = 
   let w = label st node in
-  let docs = ext st node in
+  let docs = children st node in
   let d = List.length docs in
   (* Should have a merge base clusters here *)
   (* let merge nodes = nodes in *)
@@ -32,7 +32,7 @@ let suffix_clus data len c =
   Array.init c (fun i -> 
     let entry = nodes.(i) in
     let str = match entry with 
-      | score,docs,d -> get st (List.hd docs) in
+      | score,docs,d -> label st (List.hd docs) in
     {cl_cen=make_log str;cl_elm=[]})
 
 let loader data len param =

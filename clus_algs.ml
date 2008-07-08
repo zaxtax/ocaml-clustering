@@ -2,7 +2,7 @@ open ExtArray;;
 open Common;;
 
 let usage = "usage: " ^ Sys.argv.(0) ^ " alg file param\n";; 
-type 'a lo = K 
+(* type 'a lo = K  *)
 
 let _ = 
   Sys.catch_break true;
