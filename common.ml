@@ -101,7 +101,9 @@ let make_log str =  (* loads log into data-struct *)
   let fields = Str.split (Str.regexp " +") str in
   match fields with
     | mon :: day :: time :: h :: a :: rest -> 
-	{timestamp=mktm mon day time; host=h;app=a;msg = String.concat " " rest} 
+	{timestamp=mktm mon day time; host=h;app=a;msg = String.concat " " rest}
+    | mon :: day :: time :: ["[intrusion]"] ->
+	{timestamp=mktm mon day time; host="intrusion";app="intrusion";msg =""}
     | _ -> failwith "not a logfile!";;
 	  
 let choice data k =
