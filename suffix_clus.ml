@@ -14,7 +14,7 @@ let score_node st node =
     let sl = String.length str in
     if sl < 2 then 1
     else if sl<12 then sl
-    else 15 in
+    else 10 in
   let score = d*(f w) in (score,docs,d)
 
 let suffix_clus data len c = 
@@ -32,7 +32,7 @@ let suffix_clus data len c =
   Array.init c (fun i -> 
     let entry = nodes.(i) in
     let str = match entry with 
-      | score,docs,d -> label st (List.hd docs) in
+      | score,docs,d -> get st (List.hd (ext st (List.hd docs))) in
     {cl_cen=make_log str;cl_elm=[]})
 
 let loader data len param =
